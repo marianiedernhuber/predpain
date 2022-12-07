@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Predicting pain in Complex Regional Pain Syndrome</title>
+    <script src="jatos.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-sketchpad.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+</head>
+
+<style type="text/css">
+    .jspsych-btn{margin: 10px;}
+    .jspsych-content-wrapper{width: 90%;}
+    .jspsych-content-wrapper p, h3{text-align: left;}
+    .jspsych-content-wrapper input[type="text"], textarea{width: 100%;}
+    .jspsych-content{width: 100%;}
+</style>
+
+</head>
+<body>
+    <div id="jspsych-target"></div>
+</body>
+
+
+<script>
+
+    /* initialize jsPsych */
+    var jsPsych = initJsPsych({
+        on_finish: () => jatos.endStudy(jsPsych.data.get().json())
+    });
+
+    var timeline = [];
+
+    /* add participant info to each trial */
+    /* 
+    var partinfo = {
+      type: jsPsychSurveyText,
+      questions: [
+        {prompt: 'Enter participant code'}
+      ],
+      on_finish: function(data){
+        var responses = JSON.parse(data.responses);
+        var code = responses.Q0;
+        jsPsych.data.addProperties({participantCode: code});
+      }
+    }
+    timeline.push(partinfo)
+    */
+    /* add time stamp to each trial */
+    jsPsych.data.addProperties({
+      timestamp: Date.now() 
+    });
+
+      /* participant ID */
+    var ppn_form = {
+        type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'Enter your participant ID:'}
+          ]
+        }
+    timeline.push(ppn_form)
+
+    /* Questions about daily pain experience */
+    var pain_daily = {
+        type: jsPsychSurveyText,
+        preamble: "<h1>Pain and body diary</h1>",
+        questions: [{prompt: "<b>This is a space for you to describe what your pain and body perception felt like <i>today</i> and what influences it. </b><br> <br> <br> <b>Q1: Please describe what your pain felt like today. </b> For example, some people feel that their pain is burning, or numb or feels different in different affected parts of their body.", rows: 20, columns: 80},
+              {prompt: "<b>Q2: Please describe any factors which might have influenced what your pain felt like today and how strongly you felt it. </b><br>This could be anything from lifting heavy objects to a stressful event at work.", rows: 20, columns: 80},
+              {prompt: "<b>Q3: Please describe what your body felt like today. Did you experience any changes in body perception regarding your painful limb? </b><br>This could be changes in felt size or shape of the limb.", rows: 20, columns: 80},
+              {prompt: "<b>Q4: Which factors do you think influenced any changes in body perception today? </b><br>This could be anything from looking at your painful limb to paying attention to it.", rows: 20, columns: 80},
+              {prompt: "If there is anything else you would like to share, please do so in the box below: ", rows: 10, columns: 80}],
+    };
+
+
+    timeline.push(pain_daily);
+
+    /* start the experiment */
+    jatos.onLoad(() => {
+      jatos.addAbortButton();
+      jsPsych.run(timeline);
+    });
+
+</script>
+</html>
