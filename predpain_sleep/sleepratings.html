@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Predicting pain in Complex Regional Pain Syndrome</title>
+    <script src="jatos.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-sketchpad.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+    <script src="jspsych/plugin-survey.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+
+
+    <style type="text/css">
+      .jspsych-btn{margin: 10px;}
+      .jspsych-content-wrapper{width: 90%;}
+      .jspsych-content-wrapper p, h3{text-align: left;}
+      .jspsych-content-wrapper input[type="text"], textarea{width: 100%;}
+      .jspsych-content{width: 100%;}
+     </style>
+
+  </head>
+  <body></body>
+
+  <script>
+
+      /* initialize jsPsych */
+      var jsPsych = initJsPsych({
+          show_progress_bar: true, 
+          override_safe_mode: true, 
+          on_finish: () => jatos.endStudy(jsPsych.data.get().json()) 
+      });
+
+  
+      /* create timeline */
+      var timeline = [];
+
+      /* add time stamp to each trial */
+      jsPsych.data.addProperties({
+        timestamp: Date.now()
+      }); 
+
+      /* participant ID */
+      var ppn_form = {
+        type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'Enter your participant ID:'}
+          ]
+        }
+      timeline.push(ppn_form)
+
+      /* define instructions */
+      var instructions = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `
+          <p> This is a space for you to describe what your sleep was like. </p>
+      
+          <p> For this, we will use a grid which you will use to indicate the intensity of each experience across time. </p>
+        `,
+        post_trial_gap: 1
+      };
+      timeline.push(instructions);
+
+      /* preloads stimuli automatically */ 
+      var preload = {
+          type: jsPsychPreload,
+          auto_preload: true, // automatically preload the image and audio files
+      }
+      timeline.push(preload)
+
+        /* setup retrospective experience traces for pain phenomenology */ 
+      var experiencediary = '<p style="text-align:left;font-size:30px;font-weight:bold;"> Sleep diary </p>' 
+      var desc = '<p style="text-align:left;font-size:20px;">Question '
+  
+      var sleepdescription = experiencediary + desc
+
+      var sleep = {
+          timeline: [
+          {
+            type: jsPsychSketchpad,
+            prompt_location: 'abovecanvas',
+            canvas_width: 757,
+            canvas_height: 435,
+            canvas_border_width: 2, 
+            background_image: jsPsych.timelineVariable('img'), 
+            prompt: jsPsych.timelineVariable('item'),
+          },
+          ], 
+          timeline_variables: [
+          { item: sleepdescription + '1 : How do you rate your sleep quality? <br> <br>', img: 'img/veryhigh_verylow_rating.png'},
+          { item: sleepdescription + '2: Mark hours trying to sleep but not sleeping <br> <br>', img: 'img/markhours_rating.png'},
+          ]
+      }
+
+      var sleep_daily = {
+        type: jsPsychSurveyText,
+        preamble: "<h1>Sleep diary</h1>",
+        questions: [{prompt: "<b>This is a space for you to describe how you slept and what influenced your sleep. </b><br> <br> <br> <b>Q1: Please describe how you slept. </b> ", rows: 20, columns: 80},
+              {prompt: "<b>Q2: Please describe any factors which might have influenced how you slept. </b><br>", rows: 20, columns: 80},
+              {prompt: "If there is anything else you would like to share, please do so in the box below: ", rows: 10, columns: 80}],
+      };
+
+  
+  
+      var subject_id; // value is set during the experiment
+
+      /* define procedure */
+      var phenomenology_procedure = {
+        timeline: [sleep, sleep_daily],
+        randomize_order: false,
+        repetitions: 0
+      };
+
+      timeline.push(phenomenology_procedure);
+      /*jsPsych.run(timeline); */
+
+      /* start the experiment */
+      jatos.onLoad(() => {
+        jatos.addAbortButton();
+        jsPsych.run(timeline);
+      });
+
+  </script>
+</html>
