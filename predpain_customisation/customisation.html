@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Predicting pain in Complex Regional Pain Syndrome</title>
+    <script src="jatos.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@jspsych/plugin-survey@0.2.0/css/survey.css">
+    <script src="jspsych/plugin-survey.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+
+    <style type="text/css">
+      .jspsych-btn{margin: 10px;}
+      .jspsych-content-wrapper{width: 90%;}
+      .jspsych-content-wrapper p, h3{text-align: left;}
+      .jspsych-content-wrapper input[type="text"], textarea{width: 100%;}
+      .jspsych-content{width: 100%;}
+    </style>
+  </head>
+  <body></body>
+  <script>
+
+
+    const jsPsych = initJsPsych({
+          show_progress_bar: true, 
+          override_safe_mode: true, 
+          on_finish: () => jatos.endStudy(jsPsych.data.get().json())
+    });
+
+
+    timeline = []
+
+    /* participant ID */
+    var ppn_form = {
+        type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'Enter your participant ID:'}
+          ]
+    }
+    timeline.push(ppn_form)
+
+
+    /* I created a survey in which chronic pain patients can select types of pain and body perception distortions they experience */
+  
+    /* add participant info to each trial */
+   /* var partinfo = {
+      type: jsPsychSurveyText,
+      questions: [
+        {prompt: 'Enter participant code'}
+      ],
+      on_finish: function(data){
+        var responses = JSON.parse(data.responses);
+        var code = responses.Q0;
+        jsPsych.data.addProperties({participantCode: code});
+      }
+    }
+    timeline.push(partinfo)
+
+    /* add time stamp to each trial */
+    jsPsych.data.addProperties({
+      timestamp: Date.now()
+    }); 
+
+    const trial = {
+      type: jsPsychSurvey,
+      pages: [
+        [
+          {
+            type: 'multi-select',
+            prompt: "Which types of pain do you experience?", 
+            options: ['burning',
+                      'stabbing',
+                      'numbing',
+                      'pins-and-needles', 
+                      'throbbing'],
+            columns: 0,
+            name: 'pain'
+          }, 
+          {
+            type: 'multi-select',
+            prompt: "Which statements about body perception apply to you?", 
+            options: ['My painful limb does not feel like a part of my body.',
+                  'My painful limb feels like it moves without my control.',
+                  'My painful limb feels different than the non-painful limb in terms of weight',
+                  'My painful limb feels different than the non-painful limb in terms of size', 
+                  'My painful limb feels different than the non-painful limb in terms of temperature'],
+            columns: 0,
+            name: 'body'
+          },     
+        ],
+      ],
+    };
+
+    timeline.push(trial);
+
+    /* start the experiment */
+    jatos.onLoad(() => {
+      jatos.addAbortButton();
+      jsPsych.run(timeline);
+    });
+    
+
+  </script>
+</html>
