@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Predicting pain in Complex Regional Pain Syndrome</title>
+    <script src="jatos.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-sketchpad.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+    <script src="jspsych/plugin-survey.js"></script>
+
+    <style type="text/css">
+      .jspsych-btn{margin: 10px;}
+      .jspsych-content-wrapper{width: 90%;}
+      .jspsych-content-wrapper p, h3{text-align: left;}
+      .jspsych-content-wrapper input[type="text"], textarea{width: 100%;}
+      .jspsych-content{width: 100%;}
+     </style>
+
+  </head>
+  <body></body>
+
+  <script>
+
+      /* initialize jsPsych */
+      var jsPsych = initJsPsych({
+          show_progress_bar: true, 
+          override_safe_mode: true, 
+          on_finish: () => jatos.endStudy(jsPsych.data.get().json()) 
+      });
+
+  
+      /* create timeline */
+      var timeline = [];
+
+      /* add time stamp to each trial */
+      jsPsych.data.addProperties({
+        timestamp: Date.now()
+      }); 
+
+      /* participant ID */
+      var ppn_form = {
+        type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'Enter your participant ID:'}
+          ]
+        }
+      timeline.push(ppn_form)
+
+      /* define instructions */
+      var instructions = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `
+          <p> This is a space for you to describe what your experience of chronic pain is like and what influences it. </p>
+          <p> We will ask you some questions about how you felt emotionally, 
+             how well you were able to attend to different tasks, how your body felt, 
+             and how much you were able to carry out daily tasks <strong> today </strong>. </p>
+          <p> For this, we will use a grid which you will use to indicate the intensity of each experience across time. </p>
+        `,
+        post_trial_gap: 1
+      };
+      timeline.push(instructions);
+
+      /* preloads stimuli automatically */ 
+      var preload = {
+          type: jsPsychPreload,
+          auto_preload: true, // automatically preload the image and audio files
+      }
+      timeline.push(preload)
+
+        /* setup retrospective experience traces for pain phenomenology */ 
+      var experiencediary = '<p style="text-align:left;font-size:30px;font-weight:bold;"> Experience diary </p>' 
+      var desc = '<p style="text-align:left;font-size:20px;">Question '
+      var paindescription = experiencediary + 
+                            '<p style="text-align:left;font-size:20px;"> Please describe what your pain is like using the following ratings <br> </p>' + 
+                            desc
+      var pd = ': To which extent is your pain '
+
+      var painitems = [
+          { item: paindescription + '1: To which extent do you feel pain?</p>', img: 'img/verystrong_veryweak_rating.png'}, 
+          { item: paindescription + '2' + pd + 'burning?</p>', img: 'img/verymuch_notatall_rating.png'},
+          { item: paindescription + '3' + pd + 'stabbing?</p>', img: 'img/verymuch_notatall_rating.png'},
+          { item: paindescription + '4' + pd + 'pins-and-needles?</p>', img: 'img/verymuch_notatall_rating.png'},
+          { item: paindescription + '5' + pd + 'throbbing?</p>', img: 'img/verymuch_notatall_rating.png'}
+          ]
+
+      var painquality = {
+          timeline: [
+          {
+            type: jsPsychSketchpad,
+            prompt_location: 'abovecanvas',
+            canvas_width: 757,
+            canvas_height: 435,
+            canvas_border_width: 2, 
+            prompt: jsPsych.timelineVariable('item'),
+            background_image: jsPsych.timelineVariable('img')
+          },
+          ], 
+          timeline_variables: [
+          { item: paindescription + '1: To which extent do you feel pain?</p>', img: 'img/verystrong_veryweak_rating.png'}, 
+          { item: paindescription + '2' + pd + 'burning?</p>', img: 'img/verymuch_notatall_rating.png'},
+          { item: paindescription + '3' + pd + 'stabbing?</p>', img: 'img/verymuch_notatall_rating.png'},
+          { item: paindescription + '4' + pd + 'pins-and-needles?</p>', img: 'img/verymuch_notatall_rating.png'},
+          { item: paindescription + '5' + pd + 'throbbing?</p>', img: 'img/verymuch_notatall_rating.png'}
+          ]
+      }
+
+      /* setup retrospective experience traces for attention phenomenology */ 
+      var attentiondescription = experiencediary + 
+                                 '<p style="text-align:left;font-size:20px;"> Please describe how well you are able to concentrate and function in daily life using the following ratings <br> </p>' + 
+                                 desc
+
+      var attention = {
+          timeline: [
+          {
+            type: jsPsychSketchpad,
+            prompt_location: 'abovecanvas',
+            canvas_width: 757,
+            canvas_height: 435,
+            background_image: jsPsych.timelineVariable('img'), 
+            canvas_border_width: 2, 
+            prompt: jsPsych.timelineVariable('item'),
+          },
+          ], 
+          timeline_variables: [
+          { item: attentiondescription + '1: How much are you able to focus on your daily tasks? <br> <br>', img: 'img/verymuch_notatall_rating.png'},
+          { item: attentiondescription + '2: How much does your pain interfere with your ability to carry out daily tasks? <br> <br>', img: 'img/verymuch_notatall_rating.png'},
+          { item: attentiondescription + '3: How much do you attend to your painful body part? <br> <br>', img: 'img/verymuch_notatall_rating.png'}
+          ]
+        }
+
+      /* setup retrospective experience traces for body perception phenomenology */ 
+      var bodyperceptiondescription = experiencediary +  
+                                      '<p style="text-align:left;font-size:20px;"> Please describe how you perceive your body using the following ratings <br> </p>' 
+                                      + desc
+
+      var bp = 'Does your painful limb feel different from your other limb in terms of '
+
+      var bodyperception = {
+          timeline: [
+          {
+            type: jsPsychSketchpad,
+            prompt_location: 'abovecanvas',
+            canvas_width: 757,
+            canvas_height: 435,
+            canvas_border_width: 2, 
+            background_image: jsPsych.timelineVariable('img'), 
+            prompt: jsPsych.timelineVariable('item'),
+          },
+          ], 
+          timeline_variables: [
+          { item: bodyperceptiondescription + '1 : To which extent does your painful limb feel like it is not a part of your body? <br> <br>', img: 'img/verymuch_notatall_rating.png'},
+          { item: bodyperceptiondescription + '2: To which extent do you feel like your painful limb moves without your control? <br> <br>', img: 'img/verymuch_notatall_rating.png'},
+          { item: bodyperceptiondescription + '3: To which extent your limb feel alien? &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <br> <br>', img: 'img/verymuch_notatall_rating.png'}, 
+          { item: bodyperceptiondescription + '4: ' + bp + 'weight? <br> <br>', img: 'img/muchheavier_muchlighter_rating.png'},
+          { item: bodyperceptiondescription + '5: ' + bp + 'size? <br> <br>', img: 'img/muchlarger_muchsmaller_rating.png'},
+          { item: bodyperceptiondescription + '6: ' + bp + 'temperature? <br> <br>', img: 'img/muchhotter_muchcolder_rating.png'}
+          ]
+      }
+
+      /* setup retrospective experience traces for emotion phenomenology */ 
+      var emotiondescription = experiencediary +  
+                                      '<p style="text-align:left;font-size:20px;"> Please describe how you feel <br> </p>' 
+                                      + desc
+
+      var emotions = {
+          timeline: [
+          {
+            type: jsPsychSketchpad,
+            prompt_location: 'abovecanvas',
+            canvas_width: 757,
+            canvas_height: 435,
+            canvas_border_width: 2, 
+            background_image: jsPsych.timelineVariable('img'), 
+            prompt: jsPsych.timelineVariable('item'),
+          },
+          ], 
+          timeline_variables: [
+          { item: emotiondescription + '1 : How sad or happy did you feel? <&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <br> <br>', img: 'img/happy_sad_rating.png'},
+          { item: emotiondescription + '2: How anxious or peaceful do you feel? &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <br> <br>', img: 'img/anxious_peaceful_rating.png'},
+          { item: emotiondescription + '3: How irritable or relaxed are you? &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <br> <br>', img: 'img/amenable_irritable_rating.png'}, 
+          { item: emotiondescription + '4: ' + 'How angry or calm are you? &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <br> <br>', img: 'img/angry_calm_rating.png'}
+          ]
+      }
+  
+      var subject_id; // value is set during the experiment
+
+      /* define procedure */
+      var phenomenology_procedure = {
+        timeline: [painquality, attention, bodyperception],
+        randomize_order: false,
+        repetitions: 0
+      };
+
+      timeline.push(phenomenology_procedure);
+      /*jsPsych.run(timeline); */
+
+      /* start the experiment */
+      jatos.onLoad(() => {
+        jatos.addAbortButton();
+        jsPsych.run(timeline);
+      });
+
+  </script>
+</html>
