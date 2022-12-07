@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Predicting pain in Complex Regional Pain Syndrome</title>
+    <script src="jatos.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-sketchpad.js"></script>
+    <script src="jspsych/plugin-survey-text.js"></script>
+</head>
+
+<style type="text/css">
+    .jspsych-btn{margin: 10px;}
+    .jspsych-content-wrapper{width: 90%;}
+    .jspsych-content-wrapper p, h3{text-align: left;}
+    .jspsych-content-wrapper input[type="text"], textarea{width: 100%;}
+    .jspsych-content{width: 100%;}
+</style>
+
+</head>
+<body>
+    <div id="jspsych-target"></div>
+</body>
+
+
+<script>
+
+    /* initialize jsPsych */
+    var jsPsych = initJsPsych({
+        on_finish: () => jatos.endStudy(jsPsych.data.get().json())
+    });
+
+    var timeline = [];
+
+    /* add participant info to each trial */
+    /* 
+    var partinfo = {
+      type: jsPsychSurveyText,
+      questions: [
+        {prompt: 'Enter participant code'}
+      ],
+      on_finish: function(data){
+        var responses = JSON.parse(data.responses);
+        var code = responses.Q0;
+        jsPsych.data.addProperties({participantCode: code});
+      }
+    }
+    timeline.push(partinfo)
+     */
+    /* add time stamp to each trial */
+    jsPsych.data.addProperties({
+      timestamp:  Date.now() 
+    });
+
+         /* participant ID */
+    var ppn_form = {
+        type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'Enter your participant ID:'}]
+    }
+    timeline.push(ppn_form)
+
+    /* Demographic information */
+    var demographics = {
+        type: jsPsychSurveyText,
+        preamble: "<h1>Demographic Questionnaire</h1>",
+        questions: [{prompt: "Date of birth (dd.mm.yyyy):", rows: 1, columns: 80},
+              {prompt: "Handedness (right/left/ambidextrous)", rows: 1, columns: 80},
+              {prompt: "Gender", rows: 1, columns: 80},
+              {prompt: "Please describe which body part is affected by CRPS", rows: 10, columns: 80},
+        			{prompt: "Which medication are you currently using?", rows: 10, columns: 80},
+              {prompt: "When were you diagnosed with CRPS?", rows: 1, columns: 80}],
+    };
+
+    /* Questions about general pain experience */
+    var pain_general = {
+        type: jsPsychSurveyText,
+        preamble: "<h1>Pain and body diary</h1>",
+        questions: [{prompt: "<b>This is a space for you to describe what your pain and body perception feels like and what influences it. </b><br> <br> <br> <b>Q1: Please describe what your pain feels like. </b> For example, some people feel that their pain is burning, or numb or feels different in different affected parts of their body.", rows: 10, columns: 80},
+              {prompt: "<b>Q2: Please describe any factors which might influence what your pain feels like and how strongly you feel it. </b><br>This could be anything from lifting heavy objects to a stressful event at work.", rows: 10, columns: 80},
+              {prompt: "<b>Q3: Please describe what your body feels like. Do you experience any changes in body perception regarding your painful limb? </b><br>This could be changes in felt size or shape of the limb.", rows: 10, columns: 80},
+              {prompt: "<b>Q4: Which factors do you think influence any changes in body perception? </b><br>This could be anything from looking at your painful limb to paying attention to it.", rows: 10, columns: 80},
+              {prompt: "If there is anything else you would like to share, please do so in the box below: ", rows: 1, columns: 80}],
+        button_label: "Next",
+    };
+
+    timeline.push(demographics, pain_general);
+
+    /* start the experiment */
+    jatos.onLoad(() => {
+      jatos.addAbortButton();
+      jsPsych.run(timeline);
+    });
+
+</script>
+</html>
