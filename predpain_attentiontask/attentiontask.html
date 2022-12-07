@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Predicting pain in Complex Regional Pain Syndrome</title>
+    <script src="jatos.js"></script>
+    <script src="https://unpkg.com/jspsych@7.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-audio-keyboard-response@1.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-audio-button-response@1.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@1.0.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@1.0.0"></script>
+    <link href="https://unpkg.com/jspsych@7.0.0/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/@jspsych/plugin-sketchpad@1.0.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey@0.2.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.1"></script>
+    
+    <style type="text/css">
+      .jspsych-btn{margin: 10px;}
+      .jspsych-content-wrapper{width: 90%;}
+      .jspsych-content-wrapper p, h3{text-align: left;}
+      .jspsych-content-wrapper input[type="text"], textarea{width: 100%;}
+      .jspsych-content{width: 100%;}
+  </style>
+  </head>
+  <body></body>
+  <script>
+
+    /* initialize jsPsych */
+    var jsPsych = initJsPsych({
+      on_finish: () => jatos.endStudy(jsPsych.data.get().json()), 
+      show_progress_bar: true
+    });
+
+    /* create timeline */
+    var timeline = [];
+
+    /* add participant info to each trial */
+    /*var partinfo = {
+      type: jsPsychSurveyText,
+      questions: [
+        {prompt: 'Enter participant code'}
+      ],
+      on_finish: function(data){
+        var responses = JSON.parse(data.responses);
+        var code = responses.Q0;
+        jsPsych.data.addProperties({participantCode: code});
+      }
+    }
+    timeline.push(partinfo)
+    */
+
+    /* add time stamp to each trial */
+    jsPsych.data.addProperties({
+      timestamp:  Date.now() 
+    });
+
+    /* participant ID */
+    var ppn_form = {
+        type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'Enter your participant ID:'}
+          ]
+    }
+    timeline.push(ppn_form)
+
+    /* define welcome message trial */
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "Press any key to start the attention task"
+    };
+    timeline.push(welcome);
+
+   /* setup multi-selection questions which are presented after each condition  */
+    var questions = {
+      type: jsPsychSurvey,
+      pages: [
+        [
+          {
+            type: 'multi-select',
+            prompt: "Which types of pain do you experience?", 
+            options: ['burning',
+                      'stabbing',
+                      'numbing',
+                      'pins-and-needles', 
+                      'throbbing'],
+            option_reorder: 'random',
+            columns: 5,
+            name: 'pain'
+          }, 
+          {
+            type: 'multi-select',
+            prompt: "How good do you feel emotionally?", 
+            options: ['Happy',
+                  'Peaceful',
+                  'Relaxed',
+                  'Calm'],
+            option_reorder: 'random',
+            columns: 4,
+            name: 'emotiongood'
+          },     
+          {
+            type: 'multi-select',
+            prompt: "How bad do you feel emotionally?", 
+            options: ['Sad',
+                  'Anxious',
+                  'Irritable',
+                  'Angry'],
+            option_reorder: 'random',
+            columns: 4,
+            name: 'emotionbad'
+          },     
+          {
+            type: 'multi-select',
+            prompt: "Does your painful limb feel different in one of the following aspects:", 
+            options: ['Heavier',
+                  'Lighter',
+                  'Larger', 
+                  'Smaller', 
+                  'Hotter',
+                  'Colder', 
+                  'Moving without control', 
+                  'Feeling alien'],
+            option_reorder: 'random',
+            columns: 3,
+            name: 'body'
+          } 
+        ],
+      ],
+    };
+
+   /* setup retrospective phenomenal traces to be shown after each condition  */
+    var ratings = {
+          timeline: [
+            {
+              type: jsPsychSketchpad,
+              prompt_location: 'abovecanvas',
+              canvas_width: 757,
+              canvas_height: 435,
+              canvas_border_width: 2, 
+              background_image: jsPsych.timelineVariable('img'), 
+              prompt: jsPsych.timelineVariable('item') 
+            },
+          ], 
+          timeline_variables: [
+          { item: 'Question 1: How strong was your pain? <br> <br>', img: 'img/verystrong_veryweak_attentiontask.png'},
+          { item: 'Question 2: How good did you feel emotionally? <br> <br>', img: 'img/verygood_normal_attentiontask.png'},
+          { item: 'Question 3: How bad did you feel emotionally? <br> <br>', img: 'img/verybad_normal_attentiontask.png'}, 
+          { item: 'Question 4: To which extent did you feel changes in the perception of your painful body part? <br> <br>', img: 'img/verymuch_notatall_attentiontask.png'}, 
+          { item: 'Question 5: Did your painful limb feel like it is not a part of your body? <br> <br>', img: 'img/verymuch_notatall_attentiontask.png'}, 
+          { item: 'Question 6: How much did you attend to your pain? <br> <br>', img: 'img/verymuch_notatall_attentiontask.png'}, 
+          { item: 'Question 7: How much did you attend to the task (attention to breath, heartbeat, painful or non-painful limb)?  <br> <br>', img: 'img/verymuch_notatall_attentiontask.png'}
+          ]
+      }
+
+    /* define instructions trial */
+    var instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+
+      <p>  <strong>  This task investigates the influence of attention to the body on pain experience.  </strong> </p>
+
+      <p> You will be asked to focus your attention on your painful limb, non-painful other limb, breathing or heartbeat for <strong> 5 minutes </strong> each.  </br>
+
+        <br> Please sit or lie down in a comfortable position and close your eyes. </br>
+
+        <br> Please put on the EEG headband and start recording (a voice will sound to confirm that the recording has started). </br>
+
+        <br> A gong will sound to indicate the start and end of each condition.</br>
+
+        <br> After that, you will be asked to fill out several questionnaires about your pain experience. </br></p>
+
+        <p> <strong> Press any key to begin.</strong></p>
+      `,
+      post_trial_gap: 0
+    };
+    timeline.push(instructions);
+
+
+    /* present procedure */
+
+    var attention_procedure = {
+    timeline: [
+        {
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: jsPsych.timelineVariable('task'),
+          post_trial_gap: 500
+        },
+        {
+          type: jsPsychAudioKeyboardResponse,
+          stimulus: 'sounds/gong.wav',
+          trial_ends_after_audio: true,
+          post_trial_gap: 300000
+        },
+        {
+          type: jsPsychAudioKeyboardResponse,
+          stimulus: 'sounds/gong.wav',
+          trial_ends_after_audio: true,
+          post_trial_gap: 500
+        }, 
+        questions, 
+        ratings
+    ],
+    timeline_variables: [
+        { task: `<p> Please sit or lie down in a comfortable position and close your eyes.
+                 <br> When the gong sounds, start concentrating on <b>on your painful limb</b> for 5 minutes. </p>  </br>
+                 <p>Press any key to begin.</p>` },
+        { task: `<p> Please sit or lie down in a comfortable position and close your eyes.
+                 <br> When the gong sounds, start concentrating on <b>on your non-painful limb</b> for 5 minutes. </p>  </br>
+                 <p>Press any key to begin.</p>` },
+        { task: `<p> Please sit or lie down in a comfortable position and close your eyes.
+                 <br> When the gong sounds, start concentrating on <b>on your breathing</b> for 5 minutes. </p>  </br>
+                 <p>Press any key to begin.</p>` },
+        { task: `<p> Please sit or lie down in a comfortable position and close your eyes.
+                 <br> When the gong sounds, start concentrating on <b>on your heartbeat</b> for 5 minutes. </p>  </br>
+                 <p>Press any key to begin.</p>` }
+      ],     
+      randomize_order: true
+    }
+
+    timeline.push(attention_procedure)
+
+    var expend = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+
+      <p>  <strong>  Please turn off the EEG headband and charge it to upload data.  </strong> </p>
+
+      `,
+      post_trial_gap: 0
+    };
+    timeline.push(expend);
+
+
+    /* start the experiment */
+    jatos.onLoad(() => {
+      jatos.addAbortButton();
+      jsPsych.run(timeline);
+    });
+
+
+  </script>
+</html>
